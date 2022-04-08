@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="db.properties"/>
+
+    <typeAliases>
+        <!--
+              <typeAlias type="cn.bjpowernode.domain.Hero" alias="url"/>
+        -->
+
+        <!--<typeAlias type="cn.bjpowernode.domain.Hero" alias="url"/>-->
+        <!-- <typeAlias type="cn.bjpowernode.domain.Hero" alias="Hero"/>-->
+
+        <!--
+            name:指定一个包结构，表示在该包下，所有的domin自动的起好了别名，别名就是类名，不区分大小写
+        -->
+        <package name="cn.bjpowernode.domain"/>
+        <package name="cn.bjpowernode.vo"/>
+
+        <!--
+
+        -->
+
+    </typeAliases>
+
+    <!--jdb环境-->
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <!--引用sql执行配置文件引用-->
+       <!-- <mapper resource="cn/bjpowernode/dao/HeroDao.xml"/>-->
+        <!--
+            在以后的使用中 一定会有批量的注册所存在
+            所以采用一下这种的方式可以一次注册多个文件
+        -->
+        <package name="cn.bjpowernode.dao"/>
+        
+    </mappers>
+</configuration>

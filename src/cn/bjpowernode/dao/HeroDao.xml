@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.bjpowernode.dao.HeroDao">
+    <select id="getById" parameterType="java.lang.String" resultType="Hero">
+        select * from hero where id = #{id}
+    </select>
+
+    <insert id="save">
+        insert into hero(id,name,attack,birthplace) values(#{id},#{name},#{attack},#{birthplace}) ;
+    </insert>
+
+    <select id="getAll" resultType="Hero">
+        select * from hero
+    </select>
+
+    <select id="select1" parameterType="java.lang.String" resultType="Hero">
+        select * from hero where  id = #{id}
+    </select>
+
+    <select id="getAll2" parameterType="java.lang.String" resultType="Hero">
+    /*    select * from hero  where name like '%${value}%'*/
+        select * from hero  where name like #{value}
+    </select>
+    <select id="getAll3" parameterType="java.lang.String" resultType="Hero">
+        /*    select * from hero  where name like '%${value}%'*/
+        /*
+            这种的方式是需要掌握  这种sql语句的拼接在 模糊查询中是常常使用
+            在sql语句中 所有的拼接都是 空格 的方式
+        */
+        select * from hero  where name like  % #{value} %
+    </select>
+
+    <select id="select2" resultType="int">
+        select count(*) from hero
+    </select>
+
+    <select id="select3" resultType="Map">
+        select * from hero
+    </select>
+
+    <resultMap id="stuMap" type="Hero">
+
+        <!--
+            id标签:用于反应配置主键的对应关系
+            result:用于配置普通字段的对应关系
+
+            property:配置的是类中的属性名
+            column:配置的为表中的属性名
+
+            这样就建立了 表中的属性名与类中的属性名一一对应的关系
+        -->
+
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="attack" column="attack"/>
+        <result property="birthplace" column="birthplace"/>
+
+    </resultMap>
+
+    <select id="select4" resultMap="stuMap">
+        select * from hero
+    </select>
+
+
+    <select id="select5" resultType="Hero">
+    select * from hero
+
+    <!--
+        where 标签:
+                当where标签在使用的时候，必须搭配if标签一起的使用
+                通过if标签的判断，如果符合查询的条件则展现查询的关键字 如果不符合查询的条件则不展现的关键字
+                这里需要注意的一点就是 判断的字段名必须是传递的对象的属性名
+
+                在 <if> 标签中 and与or 首个语句的 连接符会自动的 去除
+               例如: name like '%'{#name}'%'
+                    and name like '%'{#name}'%'
+                    在运行时 等同
+    -->
+        <where>
+            <if test="name!=null and name!=''">
+                name like '%' #{name} '%'
+            </if>
+
+            <if test=" birthplace!=null and birthplace!='' ">
+                and birthplace like '%' #{birthplace} '%'
+            </if>
+        </where>
+    </select>
+
+    <select id="select6" resultType="Hero">
+        select * from hero where id in
+        <!--
+            <foreach>数组遍历标签
+            collection 表示的参数的类型 array/list 数组或集合
+            item 每一次遍历出来的元素，使用的该元素的时候 需要套用在#{}中
+            open 起始标识符
+            close 结束的标识符
+            separator 元素与元素之间的分隔符
+        -->
+        <foreach collection="array" item="id"  open="("  close=")" separator=",">
+            #{id}
+        </foreach>
+     </select>
+
+    <!--
+        使用sql片段 可以将大量重复子查询sql进行包装，从而通过id进行调用
+
+        注意：在实际中 如果大量的使用的sql片段的 会大大的降低sql语句的可读性
+    -->
+    <sql id="sql1">
+        select *from hero
+    </sql>
+    <select id="select7"  resultType="Hero">
+        <include refid="sql1"/> where id = #{id}
+    </select>
+
+    <!--
+        Map集合多表查询
+    -->
+    <select id="select8" resultType="Map">
+        select h.name as hname,c.name as cname
+        from hero h
+            join hero_classroom c on h.classroom=c.id
+    </select>
+
+    <!--
+        调用Vo类进行多表联查
+    -->
+    <select id="select9" resultType="HeroClassroomVo">
+        select
+        h.id as hid,
+        h.name as hname,
+        h.attack as hattack,
+        h.birthplace as hbirthplace,
+        c.id as cid,
+        c.name as cname
+
+        from hero h join hero_classroom c
+            on h.classroom=c.id
+    </select>
+
+    <!--
+        调用Vo类多表联合条件查询
+    -->
+    <select id="select10" resultType="HeroClassroomVo">
+        select
+            h.id as hid,
+            h.name as hname,
+            h.attack as hattack,
+            h.birthplace as hbirthplace,
+            c.id as cid,
+            c.name as cname
+
+        from hero h join hero_classroom c
+                         on h.classroom=c.id
+        where  h.name like '%' #{name} '%'
+    </select>
+    <!--
+        所以如果前端的需求的重复率 不高 我们选择使用临时的map即可
+        如果前端的对于该需求的重复率较高，我们可以采用Vo类 特别方便
+    -->
+</mapper>
